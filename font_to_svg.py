@@ -15,17 +15,14 @@ FORBIDDEN = {
 }
 
 # scale factor for smaller glyphs
-SCALE = 0.5
-# vertical shift (percentage of original em height)
-SHIFT = 721
-H_SHIFT = 451
+SCALE = 0.25
 
 def safe_filename(ch):
     if ch in FORBIDDEN:
         return FORBIDDEN[ch]
     return ch
 
-def glyph_to_svg(font, char, out_path, color="#000000"):
+def glyph_to_svg(font, char, out_path, color="#FF0000"):
     cmap = font.getBestCmap()
     code = ord(char)
     if code not in cmap:
@@ -45,18 +42,21 @@ def glyph_to_svg(font, char, out_path, color="#000000"):
     width = font["hmtx"][glyph_name][0]
 
     # apply scaling and shift
-    svg_width = width * SCALE
-    svg_height = units_per_em * SCALE
-    y_shift = SHIFT-descent  # move glyph slightly lower
+    svg_width = int(width * SCALE)
+    svg_height = int(units_per_em * SCALE)
 
-    svg = f"""<svg xmlns="http://www.w3.org/2000/svg"
-      width="{svg_width}" height="{svg_height}"
-      viewBox="{H_SHIFT} {y_shift} {width} {units_per_em}">
-  <g transform="scale({SCALE},-{SCALE})">
-    <path d="{path_data}" fill="{color}"/>
-  </g>
-</svg>
-"""
+
+    svg = f"""<svg version="1.1" 
+xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+width="{svg_width}"
+height="{svg_height}"
+viewBox="0,0,{svg_width},{svg_height}">
+<g transform="translate(0,{int(svg_height*0.75)}) scale({SCALE},-{SCALE})">
+<g data-paper-data="{{&quot;isPaintingLayer&quot;:true}}" fill="{color}" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" style="mix-blend-mode: normal">
+<path d="{path_data}"/>
+</g></g></svg>"""
+
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(svg)
 
