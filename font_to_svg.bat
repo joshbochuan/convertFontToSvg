@@ -1,0 +1,1 @@
+python -i font_to_svg.py
