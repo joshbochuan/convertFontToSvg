@@ -1,4 +1,5 @@
 import os
+import math
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 
@@ -15,7 +16,10 @@ FORBIDDEN = {
 }
 
 # scale factor for smaller glyphs
-SCALE = 0.25
+SCALE = 0.02
+
+# division for chinese symbols
+DIVCNT = 512
 
 def safe_filename(ch):
     if ch in FORBIDDEN:
@@ -42,18 +46,12 @@ def glyph_to_svg(font, char, out_path, color="#FF0000"):
     width = font["hmtx"][glyph_name][0]
 
     # apply scaling and shift
-    svg_width = int(width * SCALE)
+    svg_width = math.ceil(width * SCALE)
     svg_height = int(units_per_em * SCALE)
 
-
-    svg = f"""<svg version="1.1" 
-xmlns="http://www.w3.org/2000/svg"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-width="{svg_width}"
-height="{svg_height}"
-viewBox="0,0,{svg_width},{svg_height}">
-<g transform="translate(0,{int(svg_height*0.75)}) scale({SCALE},-{SCALE})">
-<g data-paper-data="{{&quot;isPaintingLayer&quot;:true}}" fill="{color}" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" style="mix-blend-mode: normal">
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{svg_width}" height="{int(1.2*svg_height)}" viewbox="0 0 {svg_width} {int(1.2*svg_height)}">
+<g transform="translate(0,{int(0.9*svg_height)}) scale({SCALE},-{SCALE})">
+<g fill="{color}">
 <path d="{path_data}"/>
 </g></g></svg>"""
 
@@ -72,6 +70,7 @@ def main():
     lower_dir = os.path.join(root_dir, "lowercase")
     chinese_dir = os.path.join(root_dir, "chinese")
     symbol_dir = os.path.join(root_dir, "symbol")
+    fullwidth_symbol_dir = os.path.join(root_dir, "fullwidth_symbol")
     
     ascii_chars = [chr(i) for i in range(32, 127)]
     chinese_chars = ""
@@ -82,6 +81,8 @@ def main():
         if ord(i) <= 127:
             continue
         tc.append(i)
+    fullwidth_symbol = [0x3000, 0x3002, 0x300C, 0x300D, 0x3001, 0x30FB] + list(range(0xFF01, 0xFFEF+1))
+    fullwidth_symbol = list(map(chr, fullwidth_symbol))
 
     if not os.path.exists(ttf_filename):
         print(f"❌ {ttf_filename} not found.")
@@ -93,8 +94,11 @@ def main():
     os.makedirs(lower_dir, exist_ok=True)
     os.makedirs(symbol_dir, exist_ok=True)
     os.makedirs(chinese_dir, exist_ok=True)
+    os.makedirs(fullwidth_symbol_dir, exist_ok=True)
+    for i in range(1+(len(tc)//DIVCNT)):
+        os.makedirs(os.path.join(chinese_dir, "div"+str(i)), exist_ok=True)
     
-    asciiOK, tcOK = 0, 0
+    asciiOK, tcOK, fullwidthOK = 0, 0, 0
     for ch in ascii_chars:
         filename = safe_filename(ch) + ".svg"
 
@@ -111,9 +115,19 @@ def main():
             print(f"✔ {repr(ch)} → {out_path}")
         else:
             print(f"⚠ Missing glyph for {repr(ch)}")
-    for ch in tc:
+    for ch in fullwidth_symbol:
         filename = ch + ".svg"
-        out_path = os.path.join(chinese_dir, filename)
+        out_path = os.path.join(fullwidth_symbol_dir, filename)
+        ok = glyph_to_svg(font, ch, out_path, color)
+        if ok:
+            fullwidthOK += 1
+            print(f"✔ {repr(ch)} → {out_path}")
+        else:
+            print(f"⚠ Missing glyph for {repr(ch)}")
+    for i, ch in enumerate(tc):
+        filename = ch + ".svg"
+        out_path = os.path.join(chinese_dir, "div"+str(i//DIVCNT))
+        out_path = os.path.join(os.path.join(out_path, filename))
         ok = glyph_to_svg(font, ch, out_path, color)
         if ok:
             tcOK += 1
@@ -121,6 +135,7 @@ def main():
         else:
             print(f"⚠ Missing glyph for {repr(ch)}")
     print(f"ascii: {asciiOK}/{len(ascii_chars)}")
+    print(f"fw   : {fullwidthOK}/{len(fullwidth_symbol)}")
     print(f"tc   : {tcOK}/{len(tc)}")
 
 if __name__ == "__main__":
