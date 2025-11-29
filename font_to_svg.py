@@ -74,9 +74,14 @@ def main():
     symbol_dir = os.path.join(root_dir, "symbol")
     
     ascii_chars = [chr(i) for i in range(32, 127)]
-    chinese_chars = [chr(i) for i in range(0x4E00, 0x9FFF + 1)]
-
-    ALL_CHARS = ascii_chars + chinese_chars
+    chinese_chars = ""
+    with open("chineseChar.txt", 'r', encoding='utf-8') as file:
+        chinese_chars = file.read()
+    tc = list()
+    for i in chinese_chars:
+        if ord(i) <= 127:
+            continue
+        tc.append(i)
 
     if not os.path.exists(ttf_filename):
         print(f"❌ {ttf_filename} not found.")
@@ -89,23 +94,34 @@ def main():
     os.makedirs(symbol_dir, exist_ok=True)
     os.makedirs(chinese_dir, exist_ok=True)
     
-    for ch in ALL_CHARS:
+    asciiOK, tcOK = 0, 0
+    for ch in ascii_chars:
         filename = safe_filename(ch) + ".svg"
 
         if "A" <= ch <= "Z":
             out_path = os.path.join(upper_dir, filename)
         elif "a" <= ch <= "z":
             out_path = os.path.join(lower_dir, filename)
-        elif ch <= "~":
-            out_path = os.path.join(symbol_dir, filename)
         else:
-            out_path = os.path.join(chinese_dir, filename)
+            out_path = os.path.join(symbol_dir, filename)
 
         ok = glyph_to_svg(font, ch, out_path, color)
         if ok:
+            asciiOK += 1
             print(f"✔ {repr(ch)} → {out_path}")
         else:
             print(f"⚠ Missing glyph for {repr(ch)}")
+    for ch in tc:
+        filename = ch + ".svg"
+        out_path = os.path.join(chinese_dir, filename)
+        ok = glyph_to_svg(font, ch, out_path, color)
+        if ok:
+            tcOK += 1
+            print(f"✔ {repr(ch)} → {out_path}")
+        else:
+            print(f"⚠ Missing glyph for {repr(ch)}")
+    print(f"ascii: {asciiOK}/{len(ascii_chars)}")
+    print(f"tc   : {tcOK}/{len(tc)}")
 
 if __name__ == "__main__":
     main()
