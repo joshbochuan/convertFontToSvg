@@ -18,9 +18,6 @@ FORBIDDEN = {
 # scale factor for smaller glyphs
 SCALE = 0.02
 
-# division for chinese symbols
-DIVCNT = 512
-
 def safe_filename(ch):
     if ch in FORBIDDEN:
         return FORBIDDEN[ch]
@@ -95,8 +92,6 @@ def main():
     os.makedirs(symbol_dir, exist_ok=True)
     os.makedirs(chinese_dir, exist_ok=True)
     os.makedirs(fullwidth_symbol_dir, exist_ok=True)
-    for i in range(1+(len(tc)//DIVCNT)):
-        os.makedirs(os.path.join(chinese_dir, "div"+str(i)), exist_ok=True)
     
     asciiOK, tcOK, fullwidthOK = 0, 0, 0
     for ch in ascii_chars:
@@ -124,10 +119,9 @@ def main():
             print(f"✔ {repr(ch)} → {out_path}")
         else:
             print(f"⚠ Missing glyph for {repr(ch)}")
-    for i, ch in enumerate(tc):
+    for ch in tc:
         filename = ch + ".svg"
-        out_path = os.path.join(chinese_dir, "div"+str(i//DIVCNT))
-        out_path = os.path.join(os.path.join(out_path, filename))
+        out_path = os.path.join(chinese_dir, filename)
         ok = glyph_to_svg(font, ch, out_path, color)
         if ok:
             tcOK += 1
