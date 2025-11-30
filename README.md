@@ -7,12 +7,12 @@ python 3 environment and fonttools are required.
 2. install fonttools with `pip install fonttools` in a terminal.
 
 # how to use
-1. Drag the ttf file into the folder. If font was in ttc format, find a online converter like https://transfonter.org/ttc-unpack
-2. run font_to_svg.bat
-3. input the font file you want to conver to svg file, ex: consolas.ttf
-4. input the color you want the svg to be. It could be hex code, ex: #FF0000, or colors, ex: red
+1. Find your font ttf file and drag the ttf file into the folder. fonts could be found inside you system at `C:\Windows\Fonts`, or found on websites like `https://fonts.google.com/`. If font was in ttc format, find a online converter like `https://transfonter.org/ttc-unpack`
+2. run `font_to_svg.bat`
+3. input the font file you want to conver to svg file, ex: `consolas.ttf`
+4. input the color you want the svg to be. It could be hex code, ex: `#FF0000`, or colors, ex: `red`
 5. The code would run and a folder named the same as the ttf file should show up in the folder
-6. import the svg files from the symbols folder as Scratch costumes, rename the names starting with symbol_ to its corresponding symbol, ex: symbol_asterisk -> *
+6. import the svg files from the symbols folder as Scratch costumes, rename the names starting with `symbol_` to its corresponding symbol, ex: `symbol_asterisk` -> `*`
 7. import the svg files from the lowercase folder as Scratch costumes.
 8. import the svg files from the uppercase folder as Scratch costumes.
 9. The process for English alphabet and symbols are complete. Continue only if you want to include Chinese characters.
