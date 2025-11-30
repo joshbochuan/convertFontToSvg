@@ -1,5 +1,6 @@
 # convertFontToSvg
 Used for converting ttf files to svg. Created as a fast way to import fonts to Scratch.
+Currently supports English and Traditional Chinese.
 python 3 environment and fonttools are required.
 
 # setup for fonttools
